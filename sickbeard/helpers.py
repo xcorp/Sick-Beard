@@ -450,6 +450,17 @@ def copyFile(srcFile, destFile):
     except OSError:
         pass
 
+def linkOrCopyFile(srcFile, destFile):
+    if os.name == 'posix':
+        try:
+            ek.ek(os.symlink, srcFile, destFile)
+        except OSError:
+            # source and destination may be on different partitions, so hard-link is impossible
+            copyFile(srcFile, destFile)
+    else:
+        # link certainly not supported
+        copyFile(srcFile, destFile)
+
 
 def moveFile(srcFile, destFile):
     try:
@@ -457,7 +468,6 @@ def moveFile(srcFile, destFile):
         fixSetGroupID(destFile)
     except OSError:
         copyFile(srcFile, destFile)
-        ek.ek(os.unlink, srcFile)
 
 
 def make_dirs(path):
